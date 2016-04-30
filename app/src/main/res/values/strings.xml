@@ -1,0 +1,8 @@
+<resources>
+    <string name="glass_voice_trigger">It\'s coffee time</string>
+    <string name="glass_request_coffee_weight">How many grams of coffee are you grinding?</string>
+
+    <string name="app_name">Coffee Time</string>
+    <string name="title_activity_coffee_time">Coffee Time</string>
+    <string name="action_stop">Stop</string>
+</resources>

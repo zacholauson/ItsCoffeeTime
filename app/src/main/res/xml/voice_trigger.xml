@@ -1,0 +1,3 @@
+<trigger keyword="@string/glass_voice_trigger">
+    <input prompt="@string/glass_request_coffee_weight" />
+</trigger>
