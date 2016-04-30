@@ -39,7 +39,7 @@ public class CoffeeTimeService extends Service {
 
                         mLiveCard.setDirectRenderingEnabled(true)
                                 .getSurfaceHolder()
-                                .addCallback(new LiveCardRenderer(parsedStartingWeight, targetWeight));
+                                .addCallback(new LiveCardRenderer(CoffeeTimeService.this, parsedStartingWeight, targetWeight));
 
                         prepareMenuIntent();
                     }

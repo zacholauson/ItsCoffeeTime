@@ -2,52 +2,97 @@ package io.zacholauson.coffeetime;
 
 import com.google.android.glass.timeline.DirectRenderingCallback;
 
+import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.os.SystemClock;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 public class LiveCardRenderer implements DirectRenderingCallback {
 
     private static final long FRAME_TIME_MILLIS = 40;
-    private static final float TEXT_SIZE = 50f;
-    private static final int ALPHA_INCREMENT = 5;
-    private static final int MAX_ALPHA = 256;
 
-    private final Paint mPaint;
-    private final double mStartingWeight;
-    private final double mTargetWeight;
+    private final Chronometer.Listener mChronometerListener = new Chronometer.Listener() {
 
-    private int mBottomY;
-    private int mLeftX;
-    private int mRightX;
+        @Override
+        public void onChange() {
+            if (mHolder != null) {
+                draw();
+            }
+        }
+    };
+
+
+    private final CoffeeTimeCardView view;
 
     private SurfaceHolder mHolder;
     private boolean mRenderingPaused;
 
     private RenderThread mRenderThread;
 
-    public LiveCardRenderer(double startingWeight, double targetWeight) {
-        mPaint = new Paint();
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(Color.WHITE);
-        mPaint.setAntiAlias(true);
-        mPaint.setTextSize(TEXT_SIZE);
-        mPaint.setTextAlign(Paint.Align.CENTER);
-        mPaint.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
-        mPaint.setAlpha(0);
+    class CoffeeTimeCardView extends FrameLayout {
 
-        mStartingWeight = startingWeight;
-        mTargetWeight = targetWeight;
+        private final Chronometer chronometerView;
+        private final TextView startingWeightView;
+        private final TextView targetWeightView;
+
+        public CoffeeTimeCardView(Context context) {
+            this(context, null, 0);
+        }
+
+        public CoffeeTimeCardView(Context context, AttributeSet attrs) {
+            this(context, attrs, 0);
+        }
+
+        public CoffeeTimeCardView(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+
+            LayoutInflater.from(context).inflate(R.layout.card_coffee_time, this);
+
+            chronometerView = (Chronometer) findViewById(R.id.chronometer);
+            chronometerView.setListener(mChronometerListener);
+
+            startingWeightView = (TextView) findViewById(R.id.starting_weight);
+            targetWeightView = (TextView) findViewById(R.id.target_weight);
+        }
+
+        public void startChronometer() {
+            Log.wtf(CoffeeTimeCardView.class.getSimpleName(), "STARTING CHRONOMETER");
+            chronometerView.start();
+        }
+
+        public void stopChronometer() {
+            Log.wtf(CoffeeTimeCardView.class.getSimpleName(), "STOPPING CHRONOMETER");
+            chronometerView.stop();
+        }
+
+        public void setStartingWeight(double startingWeight) {
+            startingWeightView.setText(String.format("%sg", startingWeight));
+        }
+
+        public void setTargetWeight(double targetWeight) {
+            targetWeightView.setText(String.format("%sg", targetWeight));
+        }
+    }
+
+    public LiveCardRenderer(final Context context, final double startingWeight, final double targetWeight) {
+        view = new CoffeeTimeCardView(context);
+        view.setStartingWeight(startingWeight);
+        view.setTargetWeight(targetWeight);
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mBottomY = (int) (height * 0.85);
-        mLeftX = (int) (width * 0.20);
-        mRightX = (int) (width * 0.80);
+        final int measuredWidth = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
+        final int measuredHeight = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
+
+        view.measure(measuredWidth, measuredHeight);
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
     @Override
@@ -70,17 +115,16 @@ public class LiveCardRenderer implements DirectRenderingCallback {
     }
 
     private void updateRenderingState() {
-        boolean shouldRender = (mHolder != null) && !mRenderingPaused;
-        boolean isRendering = (mRenderThread != null);
+        if (mHolder != null && !mRenderingPaused) {
+            view.startChronometer();
 
-        if (shouldRender != isRendering) {
-            if (shouldRender) {
-                mRenderThread = new RenderThread();
-                mRenderThread.start();
-            } else {
-                mRenderThread.quit();
-                mRenderThread = null;
-            }
+//            mRenderThread = new RenderThread();
+//            mRenderThread.start();
+        } else {
+            view.stopChronometer();
+
+//            mRenderThread.quit();
+//            mRenderThread = null;
         }
     }
 
@@ -92,10 +136,7 @@ public class LiveCardRenderer implements DirectRenderingCallback {
             return;
         }
         if (canvas != null) {
-            mPaint.setAlpha((mPaint.getAlpha() + ALPHA_INCREMENT) % MAX_ALPHA);
-            canvas.drawText(String.format("%sg", mStartingWeight), mLeftX, mBottomY, mPaint);
-            canvas.drawText(String.format("%sg", mTargetWeight), mRightX, mBottomY, mPaint);
-
+            view.draw(canvas);
             mHolder.unlockCanvasAndPost(canvas);
         }
     }

@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Holo.Light"></style>
+    <style name="AppTheme" parent="android:Theme.Holo.Light"/>
+
+    <style name="ChronometerComponent">
+        <item name="android:layout_width">150px</item>
+        <item name="android:layout_height">150px</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_marginTop">-17px</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textSize">130px</item>
+    </style>
 
     <style name="MenuTheme" parent="@android:style/Theme.DeviceDefault">
         <item name="android:windowBackground">@android:color/transparent</item>
