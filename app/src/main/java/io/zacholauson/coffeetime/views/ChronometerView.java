@@ -1,4 +1,4 @@
-package io.zacholauson.coffeetime;
+package io.zacholauson.coffeetime.views;
 
 import android.content.Context;
 import android.os.Handler;
@@ -8,29 +8,21 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/**
- * View used to display draw a running Chronometer.
- *
- * This code is greatly inspired by the Android's Chronometer widget.
- */
-public class Chronometer extends FrameLayout {
+import io.zacholauson.coffeetime.R;
 
-    /**
-     * Interface to listen for changes on the view layout.
-     */
+public class ChronometerView extends FrameLayout {
+
     public interface Listener {
-        /** Notified of a change in the view. */
-        public void onChange();
+        void onChange();
     }
 
-    /** About 24 FPS, visible for testing. */
     static final long DELAY_MILLIS = 41;
 
     private final TextView mMinutesView;
     private final TextView mSecondsView;
-    private final TextView mCentiSecondsView;
 
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateTextRunnable = new Runnable() {
@@ -39,85 +31,59 @@ public class Chronometer extends FrameLayout {
         public void run() {
             if (mRunning) {
                 updateText();
+
                 postDelayed(mUpdateTextRunnable, DELAY_MILLIS);
             }
         }
     };
 
-    private boolean mStarted;
-    private boolean mForceStart;
-    private boolean mVisible;
     private boolean mRunning;
 
     private long mBaseMillis;
 
     private Listener mChangeListener;
 
-    public Chronometer(Context context) {
+    public ChronometerView(Context context) {
         this(context, null, 0);
     }
 
-    public Chronometer(Context context, AttributeSet attrs) {
+    public ChronometerView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public Chronometer(Context context, AttributeSet attrs, int style) {
+    public ChronometerView(Context context, AttributeSet attrs, int style) {
         super(context, attrs, style);
+
         LayoutInflater.from(context).inflate(R.layout.card_chronometer, this);
 
         mMinutesView = (TextView) findViewById(R.id.minute);
         mSecondsView = (TextView) findViewById(R.id.second);
-        mCentiSecondsView = (TextView) findViewById(R.id.centi_second);
 
         setBaseMillis(getElapsedRealtime());
     }
 
-    /**
-     * Sets the base value of the chronometer in milliseconds.
-     */
     public void setBaseMillis(long baseMillis) {
         mBaseMillis = baseMillis;
         updateText();
     }
 
-    /**
-     * Gets the base value of the chronometer in milliseconds.
-     */
-    public long getBaseMillis() {
-        return mBaseMillis;
-    }
-
-    /**
-     * Sets a {@link Listener}.
-     */
     public void setListener(Listener listener) {
         mChangeListener = listener;
     }
 
-    /**
-     * Returns the set {@link Listener}.
-     */
-    public Listener getListener() {
-        return mChangeListener;
-    }
-
-    /**
-     * Starts the chronometer.
-     */
     public void start() {
         if (!mRunning) {
             postDelayed(mUpdateTextRunnable, DELAY_MILLIS);
         }
+
         mRunning = true;
     }
 
-    /**
-     * Stops the chronometer.
-     */
     public void stop() {
         if (mRunning) {
             removeCallbacks(mUpdateTextRunnable);
         }
+
         mRunning = false;
     }
 
@@ -129,29 +95,23 @@ public class Chronometer extends FrameLayout {
     @Override
     public boolean removeCallbacks(Runnable action) {
         mHandler.removeCallbacks(action);
+
         return true;
     }
 
-    /**
-     * Returns {@link SystemClock.elapsedRealtime}, overridable for testing.
-     */
-    protected long getElapsedRealtime() {
+    private long getElapsedRealtime() {
         return SystemClock.elapsedRealtime();
     }
 
-    /**
-     * Updates the value of the chronometer, visible for testing.
-     */
-    void updateText() {
+    private void updateText() {
         long millis = getElapsedRealtime() - mBaseMillis;
-        // Cap chronometer to one hour.
-        millis %= TimeUnit.HOURS.toMillis(1);
 
-        mMinutesView.setText(String.format("%02d", TimeUnit.MILLISECONDS.toMinutes(millis)));
+        millis %= TimeUnit.HOURS.toMillis(1);
+        mMinutesView.setText(String.format(Locale.US, "%02d", TimeUnit.MILLISECONDS.toMinutes(millis)));
+
         millis %= TimeUnit.MINUTES.toMillis(1);
-        mSecondsView.setText(String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(millis)));
-        millis = (millis % TimeUnit.SECONDS.toMillis(1)) / 10;
-        mCentiSecondsView.setText(String.format("%02d", millis));
+        mSecondsView.setText(String.format(Locale.US, "%02d", TimeUnit.MILLISECONDS.toSeconds(millis)));
+
         if (mChangeListener != null) {
             mChangeListener.onChange();
         }

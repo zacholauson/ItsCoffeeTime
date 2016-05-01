@@ -12,6 +12,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import io.zacholauson.coffeetime.validators.StartingWeightValidator;
+import io.zacholauson.coffeetime.views.CoffeeTimeCardDrawer;
+
 public class CoffeeTimeService extends Service {
 
     private static final String LIVE_CARD_TAG = CoffeeTimeService.class.getSimpleName();
@@ -39,7 +42,7 @@ public class CoffeeTimeService extends Service {
 
                         mLiveCard.setDirectRenderingEnabled(true)
                                 .getSurfaceHolder()
-                                .addCallback(new LiveCardRenderer(CoffeeTimeService.this, parsedStartingWeight, targetWeight));
+                                .addCallback(new CoffeeTimeCardDrawer(CoffeeTimeService.this, parsedStartingWeight, targetWeight));
 
                         prepareMenuIntent();
                     }

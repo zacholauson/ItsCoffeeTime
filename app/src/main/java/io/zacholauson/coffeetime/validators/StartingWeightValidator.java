@@ -1,4 +1,4 @@
-package io.zacholauson.coffeetime;
+package io.zacholauson.coffeetime.validators;
 
 public class StartingWeightValidator {
 

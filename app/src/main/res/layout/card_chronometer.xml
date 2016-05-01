@@ -7,27 +7,19 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal" >
+        android:layout_gravity="center">
 
         <TextView
             android:id="@+id/minute"
+            android:layout_weight="5"
             style="@style/ChronometerComponent"/>
-
         <TextView
             android:text=":"
+            android:layout_weight="5"
             style="@style/ChronometerComponent"/>
-
         <TextView
             android:id="@+id/second"
-            style="@style/ChronometerComponent"/>
-
-        <TextView
-            android:text="."
-            style="@style/ChronometerComponent"/>
-
-        <TextView
-            android:id="@+id/centi_second"
+            android:layout_weight="5"
             style="@style/ChronometerComponent"/>
     </LinearLayout>
 </FrameLayout>
